@@ -25,6 +25,7 @@
     "moment": "^2.27.0",
     "mongoose": "^5.9.23",
     "morgan": "~1.9.1",
+    "node-fetch": "^2.6.1",
     "nodemailer": "^5.1.1",
     "nodemailer-express-handlebars": "^4.0.0",
     "nodemon": "^2.0.4",

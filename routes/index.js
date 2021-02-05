@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 require('dotenv/config');
+const pipedriveAPI = require('../src/api/pipedrive');
 
 //model
 
@@ -9,13 +10,16 @@ require('dotenv/config');
 
 
 
-/* GET home page. */
-router.get('/', async (req, res, next) => {
-
+/* GET Deals List. */
+router.get('/deals-list', async (req, res, next) => {
+    let token = process.env.TOKEN_PIPEDRIVE;
+    let pAPI = await pipedriveAPI.dealList(token);
   
-    res.send({mensage:"hi guys, What's up LinkApi. The API with NodeJS/ExpressJS/MongoDBAtlas has been created"});
+    res.send({result:pAPI});
 });
-  
+
+
+
 
 
 module.exports = router;
