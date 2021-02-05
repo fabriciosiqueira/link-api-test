@@ -19,7 +19,13 @@ router.get('/deals-list', async (req, res, next) => {
 });
 
 
-
+/* GET Deals Won List. */
+router.get('/deals-won', async (req, res, next) => {
+    let token = process.env.TOKEN_PIPEDRIVE;
+    let pAPI = await pipedriveAPI.dealWon(token);
+  
+    res.send({result:pAPI});
+});
 
 
 module.exports = router;
