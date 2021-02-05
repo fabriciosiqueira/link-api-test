@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "@handlebars/allow-prototype-access": "^1.0.3",
-    "@serialport/parser-readline": "^9.0.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "connect-flash": "^0.1.1",
@@ -32,9 +31,6 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "path": "^0.12.7",
-    "pdfkit": "^0.11.0",
-    "receipt": "^1.4.0",
-    "serialport": "@7.1.0",
     "validator": "^13.0.0"
   }
 }

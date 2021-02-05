@@ -16,22 +16,15 @@ const bodyParser = require('body-parser');
 
 
 
-const Mercadopago = require('mercadopago');
-
-
 require('dotenv/config');
 
 
 //DB Connection
 const connectDB = require('./src/database/Connection');
 connectDB();
-//Passport call
-require('./config/passport');
 
 //Gerenciamento de Rotas
 const routes = require('./routes/index');
-const userRoutes = require('./routes/user');
-const admRoutes = require('./routes/adm');
 const { Mongoose } = require('mongoose');
 
 
@@ -46,19 +39,6 @@ app.use(logger('dev'));
 app.use(cookieParser());
 
 
-
-//session config
-app.use(session({
-  secret:process.env.SECRET,
-  resave: false, 
-  saveUninitialized:false,
-  store: new MongoStore({
-    mongooseConnection:mongoose.connection
-  }),
-  cookie: {
-    maxAge:180 * 60 * 1000
-  }
-}));
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
@@ -87,9 +67,7 @@ app.use(async (req,res,next) => {
 
 
 //routes call, a order delas importam durante o compile
-app.use('/user', userRoutes);
 app.use('/', routes);
-app.use('/adm', admRoutes);
 
 
 
