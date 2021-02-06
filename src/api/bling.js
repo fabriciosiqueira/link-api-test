@@ -2,13 +2,16 @@
 require('dotenv/config');
 const fetch = require('node-fetch');
 const xml2js = require('xml2js');
+const builder = new xml2js.Builder();
 const moment = require('moment');
 const current = moment();
-const PedidosWons = require('../../models/pedidoWons');
+const PedidosWon = require('../../models/pedidoWon');
 
 
 
 const pipedriveAPI = require('./pipedrive');
+const pedido = require('d:/sistema/node/valete/models/pedido');
+const { findByIdAndUpdate } = require('../../models/pedidoWon');
 const BASE_API = `${process.env.BASE_BLING}`;
 
 module.exports =  {
@@ -65,7 +68,7 @@ module.exports =  {
                         "parcela":[
                             {
                                 "nrodias":"",
-                                "valor":140.75,
+                                "valor":null,
                                 "obs":"Soma do valor total de negocios ganhos no dia",
                                 "idformapagamento":""
                             },
@@ -115,31 +118,65 @@ module.exports =  {
 
             
         };
+
+        //soma total dos pedidos
+        let arrayItems = obj.pedidocompra.itens.item;
+        
+        const valorTotal = arrayItems.reduce((sum, arrayItem)=>{
+            return sum + arrayItem.valor;
+        }, 0);
+
+        obj.pedidocompra.parcelas.parcela[0].valor = valorTotal;
  
-        var builder = new xml2js.Builder();
-        var xml = builder.buildObject(obj);
         
-        //checkar
+        //Adicionar informaçoes ao  banco
+        try {
+            const pedido = await PedidosWon.create({
+                checkDate:data,
+                total:valorTotal
+
+            });
+
+            let result = await PedidosWon.findByIdAndUpdate(`${pedido.id}`,{checkDate:pedido.checkDate,total:pedido.total},{new:true});
+            
+            result.pedidocompra.push(obj.pedidocompra.itens);
+            await result.save();
+
+
+            /**
+             * Transformar dados da variavel obj em XML pra enviar os dados a API Bling de pedidos de compra
+             */
+            
+            var xml = builder.buildObject(obj);
+
+            const req = await fetch(`${BASE_API}/pedidoscompra/json?apikey=${token}`, {
+                method: 'POST',
+                headers:{
+                    Accept: 'application/json',
+                    "Content-type": 'application/json'
+                }
+    
+            });
+    
+            const json = await req.json();
+            
+
+            return result;
+        } catch (error) {
+           console.log(error) 
+        }
+        
 
         
 
 
 
-        /*const req = await fetch(`${BASE_API}/pedidoscompra/json?apikey=${token}`, {
-            method: 'GET',
-            headers:{
-                Accept: 'application/json',
-                "Content-type": 'application/json'
-            }
-
-        });
-
-        const json = await req.json();*/
+        
         
 
 
         //add the  diferent item in the database
         //return json;
-        return obj;
-    } 
+        
+    }
 };

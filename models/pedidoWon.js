@@ -5,13 +5,9 @@ mongoose.set('useFindAndModify', false);
 const moment = require('moment');
 const agora = moment();
  
-const PedidoSchema = mongoose.Schema({
+const PedidoWonSchema = mongoose.Schema({
    
-    id_pedido:{
-        type:String,
-        require:true,
-        trim:true,  
-    },
+    
     createdAt: {
         type: String,
         default: `${agora.format("DD/MM/YYYY HH:mm")}`
@@ -20,13 +16,14 @@ const PedidoSchema = mongoose.Schema({
         type: String,
         default: `${agora.format("DD/MM/YYYY")}`
     },
-    pedidoCompra:[{
-        type: mongoose.Schema.Types.ObjectId,
+    pedidocompra:[{}],
+    total:{
+        type:Number,
         require:true
-    }],
+    }
 });
 
 
 
-module.exports =  mongoose.model('Pedido', PedidoSchema);
+module.exports =  mongoose.model('PedidoWon', PedidoWonSchema);
 
