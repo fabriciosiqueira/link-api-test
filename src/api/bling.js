@@ -1,17 +1,12 @@
 
 require('dotenv/config');
 const fetch = require('node-fetch');
-const xml2js = require('xml2js');
-const builder = new xml2js.Builder();
 const moment = require('moment');
 const current = moment();
 const PedidosWon = require('../../models/pedidoWon');
-
-
+const transformtoXml = require('../../modules/transformtoXml');
 
 const pipedriveAPI = require('./pipedrive');
-const pedido = require('d:/sistema/node/valete/models/pedido');
-const { findByIdAndUpdate } = require('../../models/pedidoWon');
 const BASE_API = `${process.env.BASE_BLING}`;
 
 module.exports =  {
@@ -29,61 +24,23 @@ module.exports =  {
         let todayDate = current.format("DD/MM/YYYY HH:mm");
         let setTodayDate = todayDate.split(" ")
         let today = setTodayDate[0];
+        let ordemcompra=`${today.split("/").join("")}0`;
 
         let mensagem = `Nao ha Deals Won para esse dia: ${today}`;
 
-
         let obj = {
-            "pedidocompra":{
-                "numeropedido":"",
-                "datacompra":"",
-                "dataprevista":"",
-                "ordemcompra":"",
-                "desconto":"",
-                "observacoes":"Apanhado do dia de deals won",
-                "observacaointerna":"Observações internas...",
-                "fornecedor":{
-                        "id":"",
-                        "nome":"",
-                        "tipopessoa":"",
-                        "cpfcnpj":"",
-                        "ie":"",
-                        "rg":"",
-                        "contribuinte":"",
-                        "endereco":"",
-                        "endereconro":"",
-                        "complemento":"",
-                        "bairro":"",
-                        "cep":"",
-                        "cidade":"",
-                        "uf":"",
-                        "fone":"",
-                        "celular":"",
-                        "email":""
+            "pedido":{
+                "data":`${data}`,
+                "cliente":{
+                    "nome":"Fornecedor teste 1",
                 },
                 "itens":{
-                        "item":[]
-                },
-                "parcelas":{
-                        "parcela":[
-                            {
-                                "nrodias":"",
-                                "valor":null,
-                                "obs":"Soma do valor total de negocios ganhos no dia",
-                                "idformapagamento":""
-                            },
-                        ]
-                },
-                "transporte":{
-                        "transportador":"",
-                        "freteporconta":"",
-                        "qtdvolumes":"",
-                        "frete":""
-                }
+                    "item":[]
+                }  
             }
         };
 
-        obj.pedidocompra.datacompra=data;
+        obj.pedido.data = data;
 
         for(let i = 0; i < dealWOn.data.length; i++) {
 
@@ -91,14 +48,13 @@ module.exports =  {
                 let pedido = {
                     "codigo":null,
                     "descricao":"",
-                    "un":"",
-                    "qtde":"",
-                    "valor":null
+                    "qtde":1,
+                    "vlr_unit":null
                 };
     
                 pedido.codigo = dealWOn.data[i].id;
                 pedido.descricao = dealWOn.data[i].title;
-                pedido.valor = dealWOn.data[i].value;
+                pedido.vlr_unit = dealWOn.data[i].value;
 
                 //caso haja id igual nao adiciona
                 let checkId = i-1;
@@ -107,7 +63,7 @@ module.exports =  {
                 }
 
                 if(dealWOn.data[i].id != dealWOn.data[checkId].id) {
-                    obj.pedidocompra.itens.item.push(pedido);
+                    obj.pedido.itens.item.push(pedido);
                 } else {
 
                 }
@@ -120,20 +76,20 @@ module.exports =  {
         };
 
         //soma total dos pedidos
-        let arrayItems = obj.pedidocompra.itens.item;
+        let arrayItems = obj.pedido.itens.item;
         
         const valorTotal = arrayItems.reduce((sum, arrayItem)=>{
-            return sum + arrayItem.valor;
+            return sum + arrayItem.vlr_unit;
         }, 0);
 
-        obj.pedidocompra.parcelas.parcela[0].valor = valorTotal;
- 
         
-        //Adicionar informaçoes ao  banco
+
         try {
+            //Adicionar informaçoes ao  banco
             const pedido = await PedidosWon.create({
                 checkDate:data,
-                total:valorTotal
+                total:valorTotal,
+                ordemcompra:`${ordemcompra}`
 
             });
 
@@ -141,42 +97,28 @@ module.exports =  {
             
             result.pedidocompra.push(obj.pedidocompra.itens);
             await result.save();
-
-
-            /**
-             * Transformar dados da variavel obj em XML pra enviar os dados a API Bling de pedidos de compra
-             */
-            
-            var xml = builder.buildObject(obj);
-
-            const req = await fetch(`${BASE_API}/pedidoscompra/json?apikey=${token}`, {
-                method: 'POST',
-                headers:{
-                    Accept: 'application/json',
-                    "Content-type": 'application/json'
-                }
-    
-            });
-    
-            const json = await req.json();
-            
-
-            return result;
         } catch (error) {
-           console.log(error) 
+            console.log(error)
         }
         
 
+        const xml = await transformtoXml.transform(obj);
+        const json = await transformtoXml.soapReq(xml,token);
+
+
+        return json;
+    },
+    pedidoList: async (token) => {
+        const req = await fetch(`${BASE_API}/pedidos/json/?apikey=${token}`, {
+            method: 'GET',
+            headers:{
+                Accept: 'application/json',
+                "Content-type": 'application/json'
+            }
+        });
         
 
-
-
-        
-        
-
-
-        //add the  diferent item in the database
-        //return json;
-        
+        const json = await req;
+        return json;
     }
 };

@@ -20,6 +20,14 @@ const PedidoWonSchema = mongoose.Schema({
     total:{
         type:Number,
         require:true
+    },
+    ordemcompra:{
+        type: String,
+        require:true
+    },
+    idBlingPedido:{
+        type: String,
+        require:true 
     }
 });
 
