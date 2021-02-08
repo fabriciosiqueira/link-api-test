@@ -1,6 +1,6 @@
-
 require('dotenv/config');
 const fetch = require('node-fetch');
+const axios = require('axios');
 
 const BASE_API = `${process.env.BASE_PIPEDRIVE}`;
 
@@ -48,5 +48,33 @@ module.exports =  {
         dealsDetails.data = won;
          
         return dealsDetails;
-    } 
+    },
+    addDeal: async (token) => {
+
+        //Exemplo em JSON de adiçao de deal
+        let data = {
+            title: "Adding a Deal teste",
+            person_id: 2,
+            status: "won"
+        }
+        console.log(data)
+
+        try {
+
+            const req = await axios.post(`${BASE_API}/deals${token}`, data, {
+                headers: {
+                    accept: 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            
+        
+
+            const json = await req.json();
+            return json;
+        } catch (error) {
+            return error
+        }
+        
+    }
 };

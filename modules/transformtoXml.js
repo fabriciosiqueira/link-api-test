@@ -3,7 +3,7 @@ const builder = new xml2js.Builder();
 const moment = require('moment');
 const current = moment();
 const axios = require('axios');
-const soapRequest = require('easy-soap-request');
+
 require('dotenv/config');
 const BASE_API = `${process.env.BASE_BLING}`;
 
@@ -85,7 +85,7 @@ module.exports =  {
                
             
                 const { pedido } = pedidoData.data.retorno.pedidos[0];
-                console.log(pedido)
+                console.log(pedido);
 
                 const p = await PedidosWon.create({
                     checkDate:data,
