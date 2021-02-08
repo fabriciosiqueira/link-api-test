@@ -4,12 +4,12 @@ const moment = require('moment');
 const current = moment();
 
 require('dotenv/config');
-const PedidosWon = require('../models/pedidoWon');
+
 const pipedriveAPI = require('../src/api/pipedrive');
 const blingAPI = require('../src/api/bling');
 
 //model
-
+const PedidosWon = require('../models/pedidoWon');
 
 
 
@@ -32,7 +32,7 @@ router.get('/deals-won', async (req, res, next) => {
 });
 
 /* GET Check and add Deals Won and sicronize with MongoDB. */
-router.get('/register-deals-won', async (req, res, next) => {
+router.get('/add-deals-bling', async (req, res, next) => {
     
     let token = process.env.TOKEN_BLING;
     let bAPI = await blingAPI.checkOrders(token);
@@ -46,7 +46,7 @@ router.get('/bling-list', async (req, res, next) => {
         let token = process.env.TOKEN_BLING;
         let bAPI = await blingAPI.pedidoList(token);
 
-        res.send({result:bAPI.data.retorno.pedidos[0]});
+        res.send({result:bAPI});
     } catch (error) {
         res.send(error)
     }

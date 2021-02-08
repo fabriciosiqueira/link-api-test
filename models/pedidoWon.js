@@ -16,16 +16,16 @@ const PedidoWonSchema = mongoose.Schema({
         type: String,
         default: `${agora.format("DD/MM/YYYY")}`
     },
-    pedidocompra:[{}],
+    pedido:[{}],
     total:{
         type:Number,
         require:true
     },
-    ordemcompra:{
-        type: String,
-        require:true
-    },
     idBlingPedido:{
+        type: String,
+        require:true 
+    },
+    nBlingPedido:{
         type: String,
         require:true 
     }
