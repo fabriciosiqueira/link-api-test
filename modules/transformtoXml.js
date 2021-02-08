@@ -62,7 +62,7 @@ module.exports =  {
                 obj.pedido.itens.item.push(pedido);
                 
             } else {
-                console.log(mensagem);
+                return mensagem
             }
     
             //soma total dos pedidos
